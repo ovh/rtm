@@ -1,0 +1,4 @@
+deb/scripts/rtmHardware.pl=/usr/bin/rtmHardware
+deb/scripts/rtmHourly.pl=/usr/bin/rtmHourly
+deb/scripts/rtmRaidCheck.pl=/usr/bin/rtmRaidCheck
+deb/scripts/nvidia_smi_stats=/usr/bin/nvidia_smi_stats

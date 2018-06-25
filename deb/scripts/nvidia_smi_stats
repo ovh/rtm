@@ -1,0 +1,102 @@
+#! /usr/bin/perl
+$ENV{"LC_ALL"} = "POSIX";
+use strict;
+use warnings;
+use IPC::Open3;
+
+my $fnret = smi_stats();
+if(!ok($fnret) )
+{
+    print "Error with nvidia smi stats \n";
+}
+else
+{
+    # ok
+}
+
+sub smi_stats
+{
+    my $fnret = execute("/usr/bin/nvidia-smi", "--query-gpu=gpu_name,gpu_uuid,index,memory.total,memory.used,utilization.memory,utilization.gpu,encoder.stats.sessionCount,temperature.gpu,power.draw", "--format=csv,noheader,nounits");
+    if ( $fnret->{status} != 100 )
+    {
+        print "$fnret->{msg} \n";
+        return { status => 500, msg => "nvidia-smi error: $fnret->{msg}" };
+    }
+    else
+    {
+        my @values = @{$fnret->{value}};
+        foreach my $value (@values)
+        {
+            my @data = split /, /, $value;
+            my $gpu_name = $data[0];
+            my $gpu_uuid = $data[1];
+            my $index= $data[2];
+            my $memory_total=$data[3] || 0;
+            my $memory_used=$data[4] || 0;
+            my $utilization_memory = $data[5] || 0;
+            my $utilization_gpu=$data[6] || 0;
+            my $session_count = $data[7] || 0;
+            my $temperature = $data[8] || 0;
+            my $power_draw = $data[9] || 0;
+            printf "rtm_gpu.name{gpu_uuid=$gpu_uuid} ".time." '$gpu_name'\n";
+            printf "rtm_gpu.index{gpu_uuid=$gpu_uuid} ".time."  $index\n";
+            printf "rtm_gpu.memory_total{gpu_uuid=$gpu_uuid} ".time."  $memory_total\n";
+            printf "rtm_gpu.memory_used{gpu_uuid=$gpu_uuid} ".time."  $memory_used\n";
+            printf "rtm_gpu.utilization_memory{gpu_uuid=$gpu_uuid} ".time."  $utilization_memory\n";
+            printf "rtm_gpu.utilization_gpu{gpu_uuid=$gpu_uuid} ".time."  $utilization_gpu\n";
+            printf "rtm_gpu.session_count{gpu_uuid=$gpu_uuid} ".time."  $session_count\n";
+            printf "rtm_gpu.temperature{gpu_uuid=$gpu_uuid} ".time."  $temperature\n";
+            printf "rtm_gpu.power_draw{gpu_uuid=$gpu_uuid} ".time."  $power_draw\n";
+        }
+        return {status=>100};
+    }
+}
+
+sub ok
+{
+    my $arg = shift;
+    if ( ref $arg eq 'HASH' and $arg->{status} eq 100 )
+    {
+        return 1;
+    }
+    elsif (ref $arg eq 'HASH' and $arg->{status} eq 500 and defined($arg->{msg}))
+    {
+        print $arg->{msg};
+    }
+    return 0;
+}
+
+sub execute
+{
+    my ($bin, @args) = @_;
+    defined($bin) or return { status => 201, msg => 'No binary specified (execute)' };
+
+    -x $bin or return { status => 200, msg => $bin." not exist? \n" };
+
+    my ($in, $out);
+    my $pid = IPC::Open3::open3($in, $out, $out, $bin, @args);
+    $pid or return { status => 500, msg => 'Failed to fork : '.$!};
+
+    local $/;
+
+    my $stdout = <$out>;
+    my $ret    = waitpid($pid, 0);
+    my $status = ($? >> 8);
+
+    close($in);
+    close($out);
+    my @stdout = split(/\n/, $stdout);
+    if ($ret != $pid)
+    {
+        return { status => 500, msg => 'Invalid fork return (waitpid)', value => $stdout };
+    }
+    elsif ($status != 0)
+    {
+        return { status => 500, msg => 'Binary '.$bin.' exited on a non-zero status ('.$status.')', value => $stdout };
+    }
+    else
+    {
+        # Ok
+    }
+    return { status => 100, value => \@stdout };
+}
