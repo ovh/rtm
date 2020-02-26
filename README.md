@@ -1,5 +1,5 @@
 # OVH RTM
-(ovh real time monitoring probes)
+(OVH Real Time Monitoring probes)
 
 This repository contain OVH RTM probes and packaging script.
 It depends on the default implementation of the **ovh-rtm-metrics-toolkit package** and the additional tools **noderig** and **beamium**.
@@ -40,9 +40,12 @@ By installing ovh-rtm-metrics-toolkit package you will be able to have a metrics
 
 How to proceed: [RTM on Grafana](rtm_grafana.md)
 
-# How to install ovh RTM packages:
+# How to install OVH RTM packages:
 Please refer to OVH docs:
 https://docs.ovh.com/gb/en/dedicated/install-rtm/
+
+# Releases:
+http://last.public.ovh.rtm.snap.mirrors.ovh.net/
 
 # Status
 OVH datacenters are composed of many type of servers, each running differents OSes with different components.
@@ -56,11 +59,12 @@ Feel free to comment or contribute!
 
 ## RTM metrics
 
-RTM collects real time monitoring data (using noderig) on CPU, LOAD, RAM, DISK, NET.
+RTM collects real time monitoring data (based on noderig default collectors) on CPU, LOAD, RAM, DISK, NET.
 
 ## RTM probes
 
-RTM probes are perl scripts. Located in /usr/bin/rtm\*, they are launched at differents intervals.
+RTM probes are perl scripts. Results are mainly available on ovh API. 
+Located in /usr/bin/rtm\*, they are launched at differents intervals.
 It depends on which [noderig external collectors](https://github.com/ovh/noderig#collectors-1) folders they are linked. 
 You can see links located in noderig external collector:
 ```
