@@ -15,7 +15,7 @@ sub rtmRaidCheck
     my $fnret = execute('which mdadm 2>/dev/null');
     if ( $fnret->{status} != 100 )
     {
-        print "mdadm not found \n";
+        print STDERR "mdadm not found \n";
     }
     elsif (defined($fnret->{value}[0]))
     {
@@ -24,7 +24,7 @@ sub rtmRaidCheck
     $fnret = execute('which mpt-status 2>/dev/null');
     if ( $fnret->{status} != 100 )
     {
-        print "mpt-status not found \n";
+        print STDERR "mpt-status not found \n";
     }
     elsif (defined($fnret->{value}[0]))
     {
@@ -33,7 +33,7 @@ sub rtmRaidCheck
     $fnret = execute('which lsiutil 2>/dev/null');
     if ( $fnret->{status} != 100 )
     {
-        print "lsiutil not found \n";
+        print STDERR "lsiutil not found \n";
     }
     elsif (defined($fnret->{value}[0]))
     {
@@ -42,7 +42,7 @@ sub rtmRaidCheck
     $fnret = execute('which lspci 2>/dev/null');
     if ( $fnret->{status} != 100 )
     {
-        print "lspci not found \n";
+        print STDERR "lspci not found \n";
     }
     elsif (defined($fnret->{value}[0]))
     {
@@ -53,7 +53,7 @@ sub rtmRaidCheck
         $fnret = execute("$LSPCI -d 1000:");
         if ( $fnret->{status} != 100 )
         {
-            print ("error executing: $LSPCI -d 1000: \n");
+            print STDERR ("error executing: $LSPCI -d 1000: \n");
         }
         elsif (defined($fnret->{value}[0]))
         {
@@ -63,7 +63,7 @@ sub rtmRaidCheck
                 $fnret = execute("$MPTSTATUS -p 2>/dev/null | grep 'Found SCSI' | cut -f1 -d, | cut -f2 -d=");
                 if ( $fnret->{status} != 100 )
                 {
-                    print "SCSI not found \n";
+                    print STDERR "SCSI not found \n";
                 }
                 elsif(defined($fnret->{value}[0]))
                 {
@@ -88,7 +88,7 @@ sub rtmRaidCheck
                     $fnret = execute("$MPTSTATUS -i $SCSI_ID");
                     if ( $fnret->{status} != 100 )
                     {
-                        print "SCSI not found \n";
+                        print STDERR "SCSI not found \n";
                         undef $MPTSTATUS;
                     }
                     elsif (defined($fnret->{value}[0]))
@@ -101,7 +101,7 @@ sub rtmRaidCheck
         else
         {
             # nothing returned,
-            print "Nothing returned with lspci -d 1000: \n";
+            print STDERR "Nothing returned with lspci -d 1000: \n";
         }
     }
     my ($line, @mptInfo, @twCliInfo, $controler);
@@ -113,7 +113,7 @@ sub rtmRaidCheck
         $fnret = execute('cat /proc/mdstat | grep md');
         if ( $fnret->{status} != 100 )
         {
-            print "no md device found in /proc/mdstat \n";
+            print STDERR "no md device found in /proc/mdstat \n";
         }
         else
         {
@@ -185,7 +185,7 @@ sub rtmRaidCheck
         $fnret = execute("$MPTSTATUS 2>/dev/null");
         if ($fnret->{status} != '100')
         {
-            print "no MPTSTATUS \n";
+            print STDERR "no MPTSTATUS \n";
         }
         else
         {
@@ -271,7 +271,7 @@ sub rtmRaidCheck
             $fnret = execute('cat /proc/mpt/summary');
             if($fnret->{status} != '100')
             {
-                print"can't cat /proc/mpt/summary \n";
+                print STDERR "can't cat /proc/mpt/summary \n";
             }
             else
             {
@@ -663,7 +663,7 @@ sub ok
     }
     elsif (ref $arg eq 'HASH' and $arg->{status} eq 500 and defined($arg->{msg}))
     {
-        print $arg->{msg};
+        print STDERR $arg->{msg};
     }
     return 0;
 }
