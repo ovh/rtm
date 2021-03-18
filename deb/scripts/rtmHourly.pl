@@ -23,7 +23,7 @@ sub systemInfo
     }
     else
     {
-        print "Error with processes \n";
+        print STDERR "Error with processes \n";
     }
     $fnret = _getTopProcess();
     if (ok($fnret))
@@ -32,7 +32,7 @@ sub systemInfo
     }
     else
     {
-        print "Error with getTopProcess \n";
+        print STDERR "Error with getTopProcess \n";
     }
     $fnret = _getPortsAndInfos();
     if (ok($fnret))
@@ -41,7 +41,7 @@ sub systemInfo
     }
     else
     {
-        print "Error with getPortsAndInfos \n";
+        print STDERR "Error with getPortsAndInfos \n";
     }
     $fnret = uptime();
     if (ok($fnret))
@@ -50,7 +50,7 @@ sub systemInfo
     }
     else
     {
-        print "Error with uptime \n";
+        print STDERR "Error with uptime \n";
     }
 
     # hostname
@@ -71,7 +71,7 @@ sub processes
     my $fnret = execute('/bin/ps --no-headers -C noderig,beamium -o sess | sort -n | uniq');
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "ps error: ".$fnret->{msg}." \n" };
     }
     else
@@ -80,7 +80,7 @@ sub processes
         $fnret = execute('/bin/ps --no-headers -A -o sess,state,command');
         if( $fnret->{status} != 100 )
         {
-            print "ps error: ".$fnret->{msg}."\n";
+            print STDERR "ps error: ".$fnret->{msg}."\n";
             return { status => 500, msg => "ps error: ".$fnret->{msg}." \n" };
         }
         else
@@ -112,7 +112,7 @@ sub _getTopProcess
     my $fnret = execute('/bin/ps -A -o vsz,cmd --sort=-vsz --no-headers | head -n 7 | grep -vE "[0123456789]+[ ]/usr/bin/(noderig|beamium)"');
     if ( $fnret->{status} != 100 )
     {
-        print "ps error: ".$fnret->{msg}." \n";
+        print STDERR "ps error: ".$fnret->{msg}." \n";
         return { status => 500, msg => "ps error: ".$fnret->{msg}."\n" };
     }
     else
@@ -143,7 +143,7 @@ sub _getPortsAndInfos
     my $fnret = execute('/bin/netstat -tlenp | grep LISTEN | grep -v \'tcp6\' | awk \'{print $4"|"$9}\'');
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}."\n";
+        print STDERR $fnret->{msg}."\n";
         return { status => 500, msg => "netstat error: ".$fnret->{msg}."\n" };
     }
     else
@@ -212,13 +212,13 @@ sub _getPortsAndInfos
                     }
                     else
                     {
-                        print "Could not open /proc/$pid/status";
+                        print STDERR "Could not open /proc/$pid/status";
                         return {status=>500};
                     }
                 }
                 else
                 {
-                     print "Could not open /proc/$pid/cmdline";
+                     print STDERR "Could not open /proc/$pid/cmdline";
                      return {status=>500};
                 }
             }
@@ -226,7 +226,7 @@ sub _getPortsAndInfos
         }
         else
         {
-            print "Could not open /etc/passwd";
+            print STDERR "Could not open /etc/passwd";
             return {status=>500};
         }
     }
@@ -245,7 +245,7 @@ sub uptime
     }
     else
     {
-        print "Cannot open /proc/uptime";
+        print STDERR "Cannot open /proc/uptime";
         return {status => 500, msg => "Cannot open /proc/loadavg" };
     }
 }
@@ -299,7 +299,7 @@ sub ok
     }
     elsif (ref $arg eq 'HASH' and $arg->{status} eq 500 and defined($arg->{msg}))
     {
-        print $arg->{msg};
+        print STDERR $arg->{msg};
     }
     return 0;
 }

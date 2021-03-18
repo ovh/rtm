@@ -7,7 +7,7 @@ use IPC::Open3;
 my $fnret = smi_stats();
 if(!ok($fnret) )
 {
-    print "Error with nvidia smi stats \n";
+    print STDERR "Error with nvidia smi stats \n";
 }
 else
 {
@@ -19,7 +19,7 @@ sub smi_stats
     my $fnret = execute("/usr/bin/nvidia-smi", "--query-gpu=gpu_name,gpu_uuid,index,memory.total,memory.used,utilization.memory,utilization.gpu,encoder.stats.sessionCount,temperature.gpu,power.draw", "--format=csv,noheader,nounits");
     if ( $fnret->{status} != 100 )
     {
-        print "$fnret->{msg} \n";
+        print STDERR "$fnret->{msg} \n";
         return { status => 500, msg => "nvidia-smi error: $fnret->{msg}" };
     }
     else
@@ -61,7 +61,7 @@ sub ok
     }
     elsif (ref $arg eq 'HASH' and $arg->{status} eq 500 and defined($arg->{msg}))
     {
-        print $arg->{msg};
+        print STDERR $arg->{msg};
     }
     return 0;
 }

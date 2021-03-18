@@ -39,7 +39,7 @@ sub rtmHardware
     }
     else
     {
-        print "Error with CPUInfo \n";
+        print STDERR "Error with CPUInfo \n";
     }
     $fnret = getSgPaths();
     if( ok($fnret) )
@@ -58,7 +58,7 @@ sub rtmHardware
     }
     else
     {
-        print "Error with kernel_oops \n";
+        print STDERR "Error with kernel_oops \n";
     }
     $fnret = os();
     if (ok($fnret))
@@ -67,7 +67,7 @@ sub rtmHardware
     }
     else
     {
-        print "Error with os \n";
+        print STDERR "Error with os \n";
     }
     $fnret = motherboard();
     if (ok($fnret))
@@ -76,7 +76,7 @@ sub rtmHardware
     }
     else
     {
-        print "Error with motherboard \n";
+        print STDERR "Error with motherboard \n";
     }
     $fnret = disk();
     if (ok($fnret))
@@ -85,7 +85,7 @@ sub rtmHardware
     }
     else
     {
-        print "Error with disk \n";
+        print STDERR "Error with disk \n";
     }
     $fnret = lspci();
     if (ok($fnret))
@@ -94,7 +94,7 @@ sub rtmHardware
     }
     else
     {
-        print "Error with lspci \n";
+        print STDERR "Error with lspci \n";
     }
 }
 
@@ -129,7 +129,7 @@ sub CPUInfo
     }
     else
     {
-        print "Cannot open /proc/cpuinfo";
+        print STDERR "Cannot open /proc/cpuinfo";
         return {status => 500, msg => "Cannot open /proc/loadavg" };
     }
 }
@@ -140,7 +140,7 @@ sub kernel
     my $fnret = execute('uname -r');
     if ( $fnret->{status} != 100  or !defined($fnret->{value}[0]))
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "uname error: ".$fnret->{msg}};
     }
     else
@@ -151,7 +151,7 @@ sub kernel
     $fnret = execute('uname -v');
     if ( $fnret->{status} != 100 or !defined($fnret->{value}[0]))
     {
-        print $fnret->{msg}. "\n";
+        print STDERR $fnret->{msg}. "\n";
         return { status => 500, msg => "uname error: ".$fnret->{msg} };
     }
     else
@@ -166,7 +166,7 @@ sub os
     my $fnret =execute("lsb_release","-a");
     if ( $fnret->{status} != 100 )
     {
-        print "Error ".$fnret->{msg}." \n";
+        print STDERR "Error ".$fnret->{msg}." \n";
         # maybe red hat:
         if (open(my $fh, '<', "/etc/redhat-release"))
         {
@@ -179,7 +179,7 @@ sub os
         }
         else
         {
-            print "Cannot open /etc/redhat-release";
+            print STDERR "Cannot open /etc/redhat-release";
             return {status => 500, msg => "Cannot open /etc/redhat-release" };
         }
     }
@@ -210,7 +210,7 @@ sub motherboard
     my $fnret = execute('dmidecode');
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "dmidecode error: ".$fnret->{msg}};
     }
     else
@@ -280,7 +280,7 @@ sub disk
     my $fnret = execute('lsblk -r --nodeps -o name 2>/dev/null');
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "lsblk error: ".$fnret->{msg}};
     }
     else
@@ -309,7 +309,7 @@ sub disk
             my $fnret =  execute("smartctl -a $diskSmart 2>/dev/null");
             if ( $fnret->{status} != 100 )
             {
-                print $fnret->{msg}." \n";
+                print STDERR $fnret->{msg}." \n";
                 next;
             }
             else
@@ -438,7 +438,7 @@ sub disk
                     my $fnret= execute("hddtemp $diskSmart 2>/dev/null");
                     if ( $fnret->{status} != 100 )
                     {
-                        print $fnret->{msg}." \n";
+                        print STDERR $fnret->{msg}." \n";
                         next;
                     }
                     elsif (defined $fnret->{value}[0])
@@ -504,7 +504,7 @@ sub lspci
     my $fnret = execute("lspci -n 2>/dev/null");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "lspci error: ".$fnret->{msg}};
     }
     else
@@ -537,7 +537,7 @@ sub getSectorSize {
     my $fnret = execute("blockdev --getss $disk");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "Error: unable to get sector size for device $disk"};
     }
     elsif (defined($fnret->{value}[0]))
@@ -1202,7 +1202,7 @@ sub getSgPaths
     my $fnret = execute("lsscsi -tg 2>/dev/null");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "Unable to gather sg paths ".$fnret->{msg}};
     }
     else
@@ -1239,7 +1239,7 @@ sub getSupportedLogPages
     my $fnret = execute("sg_logs -x $devPath 2>/dev/null");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "Unable to get sg logs pages ".$fnret->{msg}};
     }
     else
@@ -1279,7 +1279,7 @@ sub getGenericLogPage
     my $fnret = execute("sg_logs -x --page $page $devPath");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "Unable to get sg logs requested page ".$fnret->{msg}};
     }
     else
@@ -1347,7 +1347,7 @@ sub getBackgroundScanResultsLogPage
     my $fnret = execute("sg_logs -x --page 0x15 $devPath 2>/dev/null");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "Unable to get background scan page: ".$fnret->{msg}."\n"};
     }
     else
@@ -1419,7 +1419,7 @@ sub getDmesg
     my $fnret = execute('/bin/dmesg -T | tail -n 15000');
     if ( $fnret->{status} != 100 )
     {   
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "dmesg error: ".$fnret->{msg}};
     }
     else
@@ -1479,7 +1479,7 @@ sub iostatCounters
     my $fnret = execute("/usr/bin/iostat -d -x $devPath");
     if ( $fnret->{status} != 100 )
     {
-        print $fnret->{msg}." \n";
+        print STDERR $fnret->{msg}." \n";
         return { status => 500, msg => "iostat error: ".$fnret->{msg}};
     }
     else
@@ -1960,7 +1960,7 @@ sub ok
     }
     elsif (ref $arg eq 'HASH' and $arg->{status} eq 500 and defined($arg->{msg}))
     {
-        print $arg->{msg};
+        print STDERR $arg->{msg};
     }
     return 0;
 }
